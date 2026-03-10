@@ -1,17 +1,17 @@
-// src/app/dashboard/layout.tsx
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { isAuthenticated, logout } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Users, FileText, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -27,11 +27,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen flex">
-      <aside className="w-64 bg-gray-900 text-white flex flex-col">
-        <div className="p-6 border-b border-gray-700">
-          <h1 className="text-xl font-bold">FreelanceSaaS</h1>
+      <aside className={`${collapsed ? 'w-16' : 'w-64'} bg-gray-900 text-white flex flex-col transition-all duration-300`}>
+        <div className="p-4 border-b border-gray-700 flex items-center justify-between">
+          {!collapsed && <h1 className="text-xl font-bold">FreelanceSaaS</h1>}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-gray-300 hover:text-white hover:bg-gray-800 ml-auto"
+            onClick={() => setCollapsed(!collapsed)}
+          >
+            {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          </Button>
         </div>
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 p-2 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = pathname === item.href;
@@ -39,20 +47,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                  active ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800'
-                }`}
+                className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${
+                  collapsed ? 'justify-center' : ''
+                } ${active ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800'}`}
+                title={collapsed ? item.label : undefined}
               >
                 <Icon size={18} />
-                {item.label}
+                {!collapsed && item.label}
               </Link>
             );
           })}
         </nav>
-        <div className="p-4 border-t border-gray-700">
-          <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800" onClick={logout}>
-            <LogOut size={18} className="mr-3" />
-            Sign out
+        <div className="p-2 border-t border-gray-700">
+          <Button
+            variant="ghost"
+            className={`w-full text-gray-300 hover:text-white hover:bg-gray-800 ${collapsed ? 'justify-center px-0' : 'justify-start'}`}
+            onClick={logout}
+            title={collapsed ? 'Sign out' : undefined}
+          >
+            <LogOut size={18} className={collapsed ? '' : 'mr-3'} />
+            {!collapsed && 'Sign out'}
           </Button>
         </div>
       </aside>

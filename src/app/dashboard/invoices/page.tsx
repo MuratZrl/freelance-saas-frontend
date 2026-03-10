@@ -9,7 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2, Eye } from 'lucide-react';
+import { Plus, Trash2, Eye, FileDown } from 'lucide-react';
 
 interface Client { id: string; name: string; }
 interface InvoiceItem { description: string; quantity: number; unitPrice: number; }
@@ -30,6 +30,20 @@ const statusColors: Record<string, string> = {
   paid: 'default',
   overdue: 'destructive',
 };
+
+async function downloadPdf(id: string, invoiceNumber: string) {
+  const token = localStorage.getItem('token');
+  const res = await fetch(`http://localhost:3000/invoices/${id}/pdf`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `invoice-${invoiceNumber}.pdf`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -189,7 +203,8 @@ export default function InvoicesPage() {
                     <SelectItem value="overdue">Overdue</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button variant="destructive" size="sm" onClick={() => handleDelete(inv.id)}><Trash2 size={14} /></Button>
+                    <Button variant="outline" size="sm" onClick={() => downloadPdf(inv.id, inv.invoiceNumber)}><FileDown size={14} /></Button>
+                    <Button variant="destructive" size="sm" onClick={() => handleDelete(inv.id)}><Trash2 size={14} /></Button>
               </div>
             </CardContent>
           </Card>
