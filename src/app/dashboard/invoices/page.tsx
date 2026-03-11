@@ -33,7 +33,7 @@ const statusColors: Record<string, string> = {
 
 async function downloadPdf(id: string, invoiceNumber: string) {
   const token = localStorage.getItem('token');
-  const res = await fetch(`http://localhost:3000/invoices/${id}/pdf`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/invoices/${id}/pdf`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   const blob = await res.blob();
